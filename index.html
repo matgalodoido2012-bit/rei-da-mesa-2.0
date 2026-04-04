@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REI DA MESA - BOSS EDITION</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;700;900&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        background: '#040406',
+                        card: '#0a0b10',
+                        gold: '#f5c518',
+                        boss: '#ff003c',
+                        border: '#2a2e3f'
+                    },
+                    animation: {
+                        'pulse-gold': 'pulseGold 3s infinite',
+                        'shake': 'shake 0.4s both',
+                        'float': 'float 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        pulseGold: {
+                            '0%, 100%': { opacity: 1, boxShadow: '0 0 40px rgba(245, 197, 24, 0.4)' },
+                            '50%': { opacity: 0.8, boxShadow: '0 0 70px rgba(245, 197, 24, 0.8)' },
+                        },
+                        shake: {
+                            '10%, 90%': { transform: 'translate3d(-2px, 0, 0)' },
+                            '20%, 80%': { transform: 'translate3d(3px, 0, 0)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-15px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { background-color: #040406; color: white; overflow-x: hidden; font-family: 'Inter', sans-serif; }
+        #particles-js { position: fixed; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+        #dynamic-bg {
+            position: fixed; width: 100%; height: 100%; z-index: 0;
+            background: linear-gradient(-45deg, #040406, #300000, #040406, #423100);
+            background-size: 400% 400%; opacity: 0.6;
+        }
+        .prize-banner { background: linear-gradient(135deg, #c49b00 0%, #f5c518 50%, #ffe066 100%); border: 4px solid #ffe066; }
+        .rank-Ferro { color: #a19d94; } .rank-Ouro { color: #f5c518; } .rank-Desafiante { color: #f5c518; text-shadow: 0 0 10px #f5c518; }
+        input { background: transparent; border: none; outline: none; }
+        .boss-card { border: 2px solid #ff003c; box-shadow: inset 0 0 20px rgba(255, 0, 60, 0.2); }
+    </style>
+</head>
+<body>
+
+    <div id="dynamic-bg"></div>
+    <div id="particles-js"></div>
+
+    <div id="app-content" class="relative z-10 min-h-screen flex flex-col">
+        
+        <header class="p-8 flex flex-col items-center bg-card/40 backdrop-blur-md border-b border-border">
+            <div class="flex items-center gap-6 mb-6 animate-float">
+                <span class="text-7xl">👑</span>
+                <h1 class="text-6xl font-cinzelDeco text-gold tracking-[0.2em] drop-shadow-2xl">REI DA MESA</h1>
+                <span class="text-7xl">👑</span>
+            </div>
+            
+            <div class="prize-banner animate-pulse-gold rounded-2xl px-20 py-8 text-center w-full max-w-5xl">
+                <p class="text-xs uppercase font-bold text-black/60 tracking-[0.5em] mb-2">Prize Pool Acumulada</p>
+                <div class="flex items-center justify-center">
+                    <span class="text-6xl font-cinzel font-black text-black">R$</span>
+                    <input type="number" id="prize-display" class="text-7xl font-cinzel font-black text-black w-full text-center" value="1000" onchange="updatePrize(this.value)">
+                </div>
+            </div>
+        </header>
+
+        <main class="grid grid-cols-12 gap-6 p-6 flex-1">
+            
+            <aside class="col-span-12 lg:col-span-3">
+                <div class="bg-card/80 border border-border rounded-2xl p-6 h-full flex flex-col items-center justify-center text-center backdrop-blur-sm">
+                    <div id="king-empty" class="opacity-30 font-cinzel text-xl">Mesa Vaga</div>
+                    <div id="king-active" class="hidden w-full">
+                        <span class="text-xs text-gold font-bold tracking-widest border border-gold/30 px-4 py-1 rounded-full">SOBERANO</span>
+                        <h3 id="king-name-disp" class="text-4xl font-cinzelDeco mt-8 text-white uppercase">---</h3>
+                        <p id="king-rank-disp" class="text-sm font-bold uppercase mb-10">---</p>
+                        
+                        <div class="border-y border-border/50 py-8 mb-8 grid grid-cols-2">
+                            <div>
+                                <p class="text-[10px] text-gray-500 uppercase">Streak</p>
+                                <p id="king-streak" class="text-6xl font-cinzel text-red-500 font-bold">0</p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] text-gray-500 uppercase">Prêmio</p>
+                                <p class="text-2xl font-cinzel mt-2 text-white">R$ <span id="king-money">0</span></p>
+                            </div>
+                        </div>
+
+                        <div id="cashout-area" class="hidden">
+                            <button onclick="performCashout()" class="w-full bg-gold text-black font-black py-4 rounded-xl shadow-xl border-2 border-white hover:scale-105 transition-all uppercase text-xs">
+                                💰 RETIRAR PRÊMIO (CASHOUT)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <section class="col-span-12 lg:col-span-6">
+                <div class="bg-card border-2 border-gold/20 rounded-3xl grid grid-cols-2 h-[450px] relative overflow-hidden shadow-2xl">
+                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 bg-background border border-border w-16 h-16 rounded-full flex items-center justify-center font-cinzelDeco text-gold text-2xl">VS</div>
+
+                    <div id="card-p1" class="flex flex-col border-r border-border transition-all">
+                        <div class="flex-1 flex flex-col items-center justify-center p-4">
+                            <select id="p1-rank" onchange="sync()" class="bg-transparent text-xs font-black uppercase mb-3 text-center"></select>
+                            <input type="text" id="p1-name" class="text-4xl font-cinzel font-bold mb-6 text-center uppercase" value="PLAYER 1" oninput="sync()">
+                            <div id="p1-wins" class="text-8xl font-cinzel text-gold">0</div>
+                        </div>
+                        <button onclick="declareWinner('p1')" class="bg-gold hover:bg-white text-black font-black py-7 uppercase text-sm tracking-widest transition-colors">VITÓRIA P1</button>
+                    </div>
+
+                    <div id="card-p2" class="flex flex-col transition-all">
+                        <div class="flex-1 flex flex-col items-center justify-center p-4">
+                            <select id="p2-rank" onchange="sync()" class="bg-transparent text-xs font-black uppercase mb-3 text-center"></select>
+                            <input type="text" id="p2-name" class="text-4xl font-cinzel font-bold mb-6 text-center uppercase" value="PLAYER 2" oninput="sync()">
+                            <div id="p2-wins" class="text-8xl font-cinzel text-red-600">0</div>
+                        </div>
+                        <button onclick="declareWinner('p2')" class="bg-red-700 hover:bg-red-500 text-white font-black py-7 uppercase text-sm tracking-widest transition-colors">VITÓRIA P2</button>
+                    </div>
+                </div>
+            </section>
+
+            <aside class="col-span-12 lg:col-span-3 space-y-4">
+                <div class="bg-card/80 border-2 border-boss p-6 rounded-2xl shadow-2xl boss-card backdrop-blur-sm">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-boss font-cinzel font-black text-sm uppercase tracking-tighter">👿 FINAL BOSS</h3>
+                        <span class="animate-pulse text-xl">🔥</span>
+                    </div>
+                    <input id="boss-name" type="text" value="RAZORBACK" class="w-full bg-red-900/20 border border-boss/30 p-2 rounded text-white font-cinzel font-bold text-center mb-4 uppercase">
+                    
+                    <div class="bg-black/40 p-4 rounded-lg mb-4">
+                        <p class="text-[10px] text-gray-500 uppercase mb-1">Bônus Especial (R$)</p>
+                        <input id="boss-bonus" type="number" value="5000" class="text-2xl font-cinzel text-boss font-bold w-full text-left">
+                    </div>
+                    
+                    <button onclick="invokeBoss()" class="w-full bg-boss text-white font-black py-4 rounded hover:brightness-125 transition-all text-xs uppercase tracking-widest">
+                        INVOCAR DUELO
+                    </button>
+                </div>
+
+                <div class="bg-card/80 border border-border p-5 rounded-2xl">
+                    <h3 class="text-gold font-cinzel text-[10px] mb-3 uppercase">Proximo Desafiante</h3>
+                    <input id="next-name" type="text" placeholder="Nome..." class="w-full bg-background border border-border p-3 rounded text-sm mb-3 text-left">
+                    <select id="next-rank" class="w-full bg-background border border-border p-3 rounded text-xs text-gray-400 mb-4"></select>
+                    <button onclick="replaceLoser()" class="w-full bg-white text-black font-bold py-3 rounded hover:bg-gold transition-all text-[10px] uppercase">Trocar Perdedor</button>
+                </div>
+
+                <div class="bg-card/80 border border-border p-5 rounded-2xl">
+                    <p class="text-[10px] text-gray-500 uppercase mb-2">Bônus por Win (R$)</p>
+                    <input id="win-bonus" type="number" value="50" class="w-full bg-background border border-border p-3 rounded text-gold font-bold text-lg mb-2" onchange="sync()">
+                    <button onclick="resetAll()" class="w-full text-red-500 text-[10px] uppercase hover:underline">Reset Geral</button>
+                </div>
+            </aside>
+        </main>
+    </div>
+
+    <script>
+        const RANKS = ["Ferro", "Bronze", "Prata", "Ouro", "Platina", "Esmeralda", "Diamante", "Mestre", "Grão-Mestre", "Desafiante", "FINAL BOSS"];
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        let state = {
+            p1: { name: "PLAYER 1", rank: "Ouro", wins: 0 },
+            p2: { name: "PLAYER 2", rank: "Ouro", wins: 0 },
+            king: null,
+            streak: 0,
+            prize: 1000,
+            bonus: 50,
+            bossName: "RAZORBACK",
+            bossBonus: 5000
+        };
+
+        function playVictorySound() {
+            const notes = [392, 523, 659, 783]; 
+            const now = audioCtx.currentTime;
+            notes.forEach((f, i) => {
+                const osc = audioCtx.createOscillator();
+                const g = audioCtx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(f, now + (i * 0.12));
+                g.gain.setValueAtTime(0, now + (i * 0.12));
+                g.gain.linearRampToValueAtTime(0.2, now + (i * 0.12) + 0.05);
+                g.gain.exponentialRampToValueAtTime(0.01, now + (i * 0.12) + 0.6);
+                osc.connect(g); g.connect(audioCtx.destination);
+                osc.start(now + (i * 0.12)); osc.stop(now + (i * 0.12) + 0.6);
+            });
+        }
+
+        function sync() {
+            state.p1.name = document.getElementById('p1-name').value;
+            state.p1.rank = document.getElementById('p1-rank').value;
+            state.p2.name = document.getElementById('p2-name').value;
+            state.p2.rank = document.getElementById('p2-rank').value;
+            state.bonus = Number(document.getElementById('win-bonus').value);
+            state.bossName = document.getElementById('boss-name').value;
+            state.bossBonus = Number(document.getElementById('boss-bonus').value);
+            save(); render();
+        }
+
+        function updatePrize(val) { state.prize = Number(val); save(); render(); }
+
+        function declareWinner(slot) {
+            const loserSlot = slot === 'p1' ? 'p2' : 'p1';
+            document.getElementById(`card-${loserSlot}`).classList.add('animate-shake');
+            setTimeout(() => document.getElementById(`card-${loserSlot}`).classList.remove('animate-shake'), 400);
+
+            playVictorySound();
+            
+            // Se o perdedor era o Final Boss, adiciona o bônus especial
+            if(state[loserSlot].rank === "FINAL BOSS") {
+                state.prize += state.bossBonus;
+                confetti({ particleCount: 300, spread: 100, origin: { y: 0.5 }, colors: ['#ff003c', '#f5c518'] });
+            }
+
+            state[slot].wins++;
+            if(state.king === slot) state.streak++;
+            else { state.king = slot; state.streak = 1; }
+            
+            state.prize += state.bonus;
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+            save(); render();
+        }
+
+        function invokeBoss() {
+            const target = state.king === 'p1' ? 'p2' : 'p1';
+            state[target] = { name: state.bossName, rank: "FINAL BOSS", wins: 0 };
+            document.getElementById(`${target}-name`).value = state.bossName;
+            document.getElementById(`${target}-rank`).value = "FINAL BOSS";
+            save(); render();
+            alert("UM NOVO DESAFIO SURGIU: FINAL BOSS NA MESA!");
+        }
+
+        function replaceLoser() {
+            const name = document.getElementById('next-name').value;
+            const rank = document.getElementById('next-rank').value;
+            if(!name) return;
+            const target = state.king === 'p1' ? 'p2' : 'p1';
+            state[target] = { name, rank, wins: 0 };
+            document.getElementById(`${target}-name`).value = name;
+            document.getElementById(`${target}-rank`).value = rank;
+            save(); render();
+        }
+
+        function performCashout() {
+            if(!confirm(`Deseja retirar o prêmio de R$ ${state.prize}?`)) return;
+            state.prize = 1000;
+            state.king = null;
+            state.streak = 0;
+            state.p1.wins = 0; state.p2.wins = 0;
+            save(); render();
+        }
+
+        function render() {
+            document.getElementById('prize-display').value = state.prize;
+            document.getElementById('win-bonus').value = state.bonus;
+            document.getElementById('boss-name').value = state.bossName;
+            document.getElementById('boss-bonus').value = state.bossBonus;
+            
+            ['p1', 'p2'].forEach(p => {
+                document.getElementById(`${p}-wins`).innerText = state[p].wins;
+                document.getElementById(`${p}-rank`).className = `bg-transparent text-xs font-black uppercase mb-3 text-center rank-${state[p].rank}`;
+            });
+
+            if(state.king) {
+                document.getElementById('king-empty').classList.add('hidden');
+                document.getElementById('king-active').classList.remove('hidden');
+                document.getElementById('king-name-disp').innerText = state[state.king].name;
+                document.getElementById('king-rank-disp').innerText = state[state.king].rank;
+                document.getElementById('king-rank-disp').className = `text-sm font-bold uppercase mb-10 rank-${state[state.king].rank}`;
+                document.getElementById('king-streak').innerText = state.streak;
+                document.getElementById('king-money').innerText = state.prize.toLocaleString('pt-BR');
+                document.getElementById('cashout-area').classList.toggle('hidden', state.streak < 3);
+            }
+        }
+
+        function save() { localStorage.setItem('rei_boss_v5', JSON.stringify(state)); }
+        
+        function load() {
+            const selects = ['p1-rank', 'p2-rank', 'next-rank'];
+            selects.forEach(id => {
+                document.getElementById(id).innerHTML = RANKS.map(r => `<option value="${r}">${r}</option>`).join('');
+            });
+
+            const saved = localStorage.getItem('rei_boss_v5');
+            if(saved) {
+                state = JSON.parse(saved);
+                document.getElementById('p1-name').value = state.p1.name;
+                document.getElementById('p1-rank').value = state.p1.rank;
+                document.getElementById('p2-name').value = state.p2.name;
+                document.getElementById('p2-rank').value = state.p2.rank;
+            }
+            render();
+        }
+
+        particlesJS("particles-js", {
+            "particles": {
+                "number": { "value": 80, "density": { "enable": true, "value_area": 800 } },
+                "color": { "value": ["#f5c518", "#ff003c"] },
+                "opacity": { "value": 0.5, "random": true },
+                "size": { "value": 3, "random": true },
+                "move": { "enable": true, "speed": 2, "direction": "top", "random": true, "straight": false, "out_mode": "out" }
+            }
+        });
+
+        function resetAll() { if(confirm("Limpar tudo?")) { localStorage.clear(); location.reload(); } }
+        window.onload = load;
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</body>
+</html>
